@@ -9,11 +9,14 @@ package packageP1;
  * @author Vitor
  */
 import java.awt.Font;
+import java.awt.HeadlessException;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 public class Cadastro extends JFrame{
@@ -23,6 +26,11 @@ public class Cadastro extends JFrame{
     private final JTextField txtUsuario;
     private final JPasswordField passSenha;
     private final JPasswordField passConfSenha;
+    private boolean usuarioValido;
+    private boolean cadastroValido;
+    
+    private String mensagemJOption;
+    private int mensagemTipo = 0;
     
     public Cadastro() {
         setLocationRelativeTo(null);
@@ -82,6 +90,67 @@ public class Cadastro extends JFrame{
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.setBounds(50, 156, 117, 25);
         tela.add(btnCancelar);
+        
+        btnCadastrar.addActionListener((ActionEvent e) -> {
+            try {
+                Usuario usu = new Usuario();
+                
+                usu.setNome(txtNome.getText());
+                usu.setUsuario(txtUsuario.getText());
+                usu.setSenha(passSenha.getText());
+                
+                if("".equals(usu.getNome())){
+                    mensagemJOption = "Campo nome do usuário precisa ser informado!";
+                    mensagemTipo = 0;
+                } else if ("".equals(usu.getUsuario())){
+                    mensagemJOption = "Campo usuario precisa ser informado!";
+                    mensagemTipo = 0;
+                } else if ("".equals(usu.getSenha())){
+                    mensagemJOption = "Campo senha precisa ser informado!";
+                    mensagemTipo = 0;
+                } else if (!usu.getSenha().equals(passConfSenha.getText())){
+                    mensagemJOption = "Senhas não coincidem!";
+                    mensagemTipo = 0;
+                } else {
+                    usuarioValido = usu.verificaUsuario(usu.getUsuario());
+                    
+                    if (usuarioValido == true){
+                        mensagemJOption = "Usuario já existe.";
+                        mensagemTipo = 0;
+                    } else {
+                        cadastroValido = usu.cadastraUsuario(usu.getNome(),
+                                                             usu.getUsuario(),
+                                                             usu.getSenha());
+                        
+                        if (cadastroValido == true){
+                            mensagemJOption = "Usuario cadastrado com sucesso!";
+                            mensagemTipo = 1;
+                        } else {
+                            mensagemJOption = "Erro ao cadastrar usuário!";
+                            mensagemTipo = 0;
+                        }
+                    }
+                }
+                
+                JOptionPane.showMessageDialog(null,
+                        mensagemJOption, "Atenção", mensagemTipo );
+                if (mensagemTipo == 1){
+                    Login nLogin = new Login();
+                    nLogin.mostraTela();
+                    
+                    dispose();
+                }
+            }catch (HeadlessException ec){
+                System.out.println("Erro no cadastro do usuário "
+                + ec.getMessage());
+            }
+        });
+        
+        btnCancelar.addActionListener((ActionEvent e) -> {
+            Login nLogin = new Login();
+            nLogin.mostraTela();
+            dispose();
+        });
     }
     public void abreTela() {
         Cadastro panelCadastro = new Cadastro();
